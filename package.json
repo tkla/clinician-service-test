@@ -1,0 +1,32 @@
+{
+  "name": "clinician-service-test",
+  "version": "1.0.0",
+  "description": "A security feature that will alert us within 5 minutes of a phlebotomist leaving the expected zone around a patient’s home. We want to make sure that all our phlebotomists are accounted for and safe at all times. This is just a test repo.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node app/clinicians.ts",
+    "dev": "nodemon --exec ts-node app/clinicians.ts",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tkla/clinician-service-test.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tkla/clinician-service-test/issues"
+  },
+  "homepage": "https://github.com/tkla/clinician-service-test#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}
