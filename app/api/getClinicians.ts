@@ -79,7 +79,7 @@ const GET_CLINICIANS_URL = "/clinicianstatus/";
     ]
 }
 */
-export const getClinicianStatus = async (id: number): Promise<any> => {
+export const getClinicianStatus = async (id: number): Promise<any | null> => {
     // I should type the return to the above instead of a Promise<any>
     const getClinicianStatusUrl = BASE_API_URL + GET_CLINICIANS_URL + id;
     try {
@@ -102,6 +102,7 @@ export const getClinicianStatus = async (id: number): Promise<any> => {
         return clinicianMeta;
     } catch (err) {
         console.log('Error in getClinicianStatus: ', err);
+        return null;
     }
 
 }
