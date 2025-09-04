@@ -1,4 +1,5 @@
 import { getClinicians } from "./api/dummy-apis";
+import { getClinicianStatus } from "./api/getClinicians";
 import { GeoPoint, PolygonList } from "./types/clinicians-api-types";
 
 /*
@@ -43,7 +44,13 @@ async function startMonitoring() {
     let clinicianIds = await getClinicians();
     console.log('Clinicians Found: ' + clinicianIds);
     console.log('== Begin Monitoring =');
-    monitorClinicians(clinicianIds);
+
+    // Debug
+    // monitorClinicians(clinicianIds);
+    // getClinicianStatus(2);
+    // getClinicianStatus(1);
+
+   // init polling 
 }
 
 startMonitoring();
