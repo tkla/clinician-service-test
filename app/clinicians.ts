@@ -2,7 +2,7 @@ import { getClinicians } from "./api/dummy-apis";
 import { getClinicianStatus } from "./api/getClinicians";
 import { GeoPoint, PolygonList } from "./types/clinicians-api-types";
 
-const POLLING_INTERVAL_MS = 60000; // 1 minute polling
+const POLLING_INTERVAL_MS = 10000; // 1 minute polling
 
 /*
     Check if a given clinician current coordinate is within bounds of the given polygon.
@@ -25,7 +25,7 @@ async function monitorClinicians(ids: Array<number>): Promise<any> {
     try {
         const promises = ids.map(async id => {
             let clinicianData = await getClinicianStatus(id);
-            // console.log('Polling ', id);
+            console.log('Polling ', id);
 
             if (!clinicianData || !clinicianData.features || clinicianData.features.length < 2) {
                 return { id, isValid: false, data: clinicianData, error: 'Received undefined Clinician status' };
@@ -37,6 +37,7 @@ async function monitorClinicians(ids: Array<number>): Promise<any> {
                 .map((feature: any) => feature.geometry.coordinates[0]);
 
             if (isClinicianInBounds(currentPos, bounds)) {
+                console.log('Valid clinician coordinate');
                 return { id, isValid: true, data: clinicianData };
             } else {
                 // TODO add email alert
@@ -55,17 +56,6 @@ async function sendAlert(id: number) {
 }
 
 /*
-    We hardcode this by pretending to get the list of clinicians from some API or 
-    internal DB
-*/
-async function pollClinicians(cliniciansIds: Array<number>) {
-    // Iterate through list of clinicians id and wrap in a promise.all for concurrency?
-    // Might need to add small and simple rate limiter just in case.
-
-    // 1. Iterate through clinician IDs and run
-}
-
-/*
     Begin the polling for each clinician IDs 1-7
 */
 async function startMonitoring() {
@@ -74,14 +64,14 @@ async function startMonitoring() {
     console.log('== Begin Monitoring =');
 
     // Debug
-    monitorClinicians(clinicianIds);
+    // monitorClinicians(clinicianIds);
     // getClinicianStatus(2);
     // getClinicianStatus(1);
 
     // init polling 
-    // setInterval(() => {
-    //     monitorClinicians(clinicianIds);
-    // }, POLLING_INTERVAL_MS);
+    setInterval(() => {
+        monitorClinicians(clinicianIds);
+    }, POLLING_INTERVAL_MS);
 }
 
 startMonitoring();
