@@ -14,7 +14,7 @@ export async function sendAlert(id: number, message?: string) {
     const now: Date = new Date();
     const mailOptions = {
         from: process.env.SENDER_EMAIL,
-        to: 'gdsubwqd@sharklasers.com',
+        to: process.env.SPRINTER_EMAIL,
         subject: `Kenny La Sprinter Health Programming Challenge - Clinician ${id} Out of Bounds`,
         text: now.toString() + '\n' + alertMessage,
     };
