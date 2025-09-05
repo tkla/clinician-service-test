@@ -9,7 +9,6 @@ const POLLING_INTERVAL_MS = 60000; // 1 minute polling
 
 /*
     Check if a given clinician current coordinate is within bounds of the given polygon.
-    TODO define some custom type for the polygon.
 
     We're going to keep it simple by checking if the clinician is within a bounding box sized to the polygons in bounds
     to simplify checking if the clinician is in the area. This is not entirely accurate, for example clinician 4 has a
@@ -52,8 +51,6 @@ function isClinicianInBounds(currentPos: GeoPoint, bounds: PolygonList): boolean
 /*
     Go through the clinician id list and use sprinter's API to get their current coordinates and their allowed boundaries.
     Check if they are in a valid place or not and alert if needed. 
-
-    Can use promise.allSettled for concurrency but I want to add a simple rate limiter if I can later to limit the QPS
 */
 async function monitorClinicians(ids: Array<number>): Promise<any> {
     try {
