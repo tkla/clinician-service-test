@@ -9,7 +9,7 @@ function delay(ms: number = 500) {
 export const getClinicians = async (): Promise<number[]> => {
     let clinicians: Array<number> = [];
     await delay();
-    clinicians = [1, 3]; // Hard coded values
+    clinicians = [1]; // Hard coded values
     return clinicians;
 };
 

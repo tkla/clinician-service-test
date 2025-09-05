@@ -91,13 +91,15 @@ export const getClinicianStatus = async (id: number): Promise<any | null> => {
         let features = clinicianMeta.features;
         if (!features) throw new Error('Expected Features in FeatureCollection but field is undefined.');
         // features first index is always a clinician's coordinate or 'point' type
-        // The rest of the items should be type Polygon
+        // The rest of the items should be type Polygon with no interior ring
         for (let i = 1; i < features.length; i++) {
             if (features[i].geometry.coordinates.length > 1) {
                 // TODO instead of throwing error, send out an email alert
                 throw new Error('We currently do not handle GeoJSON Polygons with interior rings, please redefine the permitted boundary with the exterior ring coordinates defined.');
             }
         }
+        // Also a nice to have would be checking if the polygon coordinates are valid GeoJson format
+        // For example, min 4 coordinates for a polygon, 1st and last coordinates must be same
 
         return clinicianMeta;
     } catch (err) {
