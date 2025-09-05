@@ -3,10 +3,10 @@ export type Polygon = GeoPoint[];
 export type PolygonList = [Polygon];
 
 export interface FeaturePolygon {
-    type: "Feature",
+    type: 'Feature',
     properties: {},
     geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [Polygon],
     }
 }

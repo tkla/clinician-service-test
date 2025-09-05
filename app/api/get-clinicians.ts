@@ -1,6 +1,7 @@
+import { sendAlert } from './send-mail';
 // If this were a Prod APP, read from .env files instead.
-const BASE_API_URL = "https://3qbqr98twd.execute-api.us-west-2.amazonaws.com/test"
-const GET_CLINICIANS_URL = "/clinicianstatus/";
+const BASE_API_URL = 'https://3qbqr98twd.execute-api.us-west-2.amazonaws.com/test';
+const GET_CLINICIANS_URL = '/clinicianstatus/';
 
 /*
     Get Clinicians API. Returns the geocoordinates of a clinician along with coordinates of their permitted polygon
@@ -79,7 +80,7 @@ const GET_CLINICIANS_URL = "/clinicianstatus/";
     ]
 }
 */
-export const getClinicianStatus = async (id: number): Promise<any> => {
+export const getClinicianStatus = async (id: number): Promise<any | null> => {
     // I should type the return to the above instead of a Promise<any>
     const getClinicianStatusUrl = BASE_API_URL + GET_CLINICIANS_URL + id;
     try {
@@ -91,17 +92,20 @@ export const getClinicianStatus = async (id: number): Promise<any> => {
         let features = clinicianMeta.features;
         if (!features) throw new Error('Expected Features in FeatureCollection but field is undefined.');
         // features first index is always a clinician's coordinate or 'point' type
-        // The rest of the items should be type Polygon
+        // The rest of the items should be type Polygon with no interior ring
         for (let i = 1; i < features.length; i++) {
             if (features[i].geometry.coordinates.length > 1) {
-                // TODO instead of throwing error, send out an email alert
-                throw new Error('We currently do not handle GeoJSON Polygons with interior rings, please redefine the permitted boundary with the exterior ring coordinates defined.');
+                sendAlert(id, 'We currently do not handle GeoJSON Polygons with interior rings, please redefine the permitted boundary with only exterior ring coordinates defined.');
+                return null; // Alternatively we could throw an error if we want to more explicitly not allow interior rings.
             }
         }
+        // Also a nice to have would be checking if the polygon coordinates are valid GeoJson format
+        // For example, min 4 coordinates for a polygon, 1st and last coordinates must be same
 
         return clinicianMeta;
     } catch (err) {
-        console.log('Error in getClinicianStatus: ', err);
+        console.error('Error in getClinicianStatus: ', err);
+        return null;
     }
 
 }
