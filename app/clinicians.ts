@@ -5,7 +5,7 @@ import { sendAlert } from "./api/send-mail";
 import RateLimiter from './rate_limiter/rate-limiter';
 import 'dotenv/config';
 
-const POLLING_INTERVAL_MS = 5000; // 1 minute polling
+const POLLING_INTERVAL_MS = 60000; // 1 minute polling
 
 /*
     Check if a given clinician current coordinate is within bounds of the given polygon.
