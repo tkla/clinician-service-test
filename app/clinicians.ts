@@ -2,9 +2,10 @@ import { getClinicians } from './api/dummy-apis';
 import { getClinicianStatus } from './api/get-clinicians';
 import { GeoPoint, Polygon, PolygonList } from './types/clinicians-api-types';
 import { sendAlert } from "./api/send-mail";
+import RateLimiter from './rate_limiter/rate-limiter';
 import 'dotenv/config';
 
-const POLLING_INTERVAL_MS = 60000; // 1 minute polling
+const POLLING_INTERVAL_MS = 5000; // 1 minute polling
 
 /*
     Check if a given clinician current coordinate is within bounds of the given polygon.
@@ -78,9 +79,13 @@ async function monitorClinicians(ids: Array<number>): Promise<any> {
         // A log of the results of each call. Could send this to a worker dedicated to logging errors and warnings.
         // But for now is unused.
         let results = await Promise.allSettled(promises);
+        console.log('=== Polling Result ===');
         results.forEach(p => {
             if (p.status === 'fulfilled') {
-                console.log(`Clinician: ${p.value.id}, isValid: ${p.value.isValid}`);
+                console.log(`Clinician: ${p.value.id}`);
+                console.log(`isValid: ${p.value.isValid}`);
+                console.log('Errors:', p.value.error);
+                console.log('-');
             } else {
                 // TODO either handle or log the rejected promises.
             }
@@ -97,6 +102,7 @@ async function monitorClinicians(ids: Array<number>): Promise<any> {
 */
 async function startMonitoring() {
     let clinicianIds = await getClinicians();
+    RateLimiter.getInstance();
     console.log('Clinicians Found: ' + clinicianIds);
     console.log('== Begin Monitoring =');
 
