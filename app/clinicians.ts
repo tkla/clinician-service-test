@@ -1,8 +1,10 @@
-import { getClinicians } from "./api/dummy-apis";
-import { getClinicianStatus } from "./api/getClinicians";
-import { GeoPoint, Polygon, PolygonList } from "./types/clinicians-api-types";
+import { getClinicians } from './api/dummy-apis';
+import { getClinicianStatus } from './api/get-clinicians';
+import { GeoPoint, Polygon, PolygonList } from './types/clinicians-api-types';
+import { sendAlert } from "./api/send-mail";
+import 'dotenv/config';
 
-const POLLING_INTERVAL_MS = 10000; // 1 minute polling
+const POLLING_INTERVAL_MS = 20000; // 1 minute polling
 
 /*
     Check if a given clinician current coordinate is within bounds of the given polygon.
@@ -16,8 +18,6 @@ const POLLING_INTERVAL_MS = 10000; // 1 minute polling
     for more accurate boundary checking compared to a bounding box.
 */
 function isClinicianInBounds(currentPos: GeoPoint, bounds: PolygonList): boolean {
-    console.log('Checking: ', currentPos);
-    console.log('bounds: ', bounds);
     const currentLat = currentPos[0];
     const currentLong = currentPos[1];
     let isInBounds = false;
@@ -39,10 +39,6 @@ function isClinicianInBounds(currentPos: GeoPoint, bounds: PolygonList): boolean
             maxLong = Math.max(maxLong, long);
         });
 
-        // console.log('minLat: ', minLat);
-        // console.log('minLong: ', minLong);
-        // console.log('maxLat: ', maxLat);
-        // console.log('maxLong: ', maxLong);
         let withinLat = currentLat >= minLat && currentLat <= maxLat;
         let withinLong = currentLong >= minLong && currentLong <= maxLong;
 
@@ -62,7 +58,6 @@ async function monitorClinicians(ids: Array<number>): Promise<any> {
     try {
         const promises = ids.map(async id => {
             let clinicianData = await getClinicianStatus(id);
-
             if (!clinicianData || !clinicianData.features || clinicianData.features.length < 2) {
                 return { id, isValid: false, data: clinicianData, error: 'Received undefined Clinician status' };
             }
@@ -73,22 +68,28 @@ async function monitorClinicians(ids: Array<number>): Promise<any> {
                 .map((feature: any) => feature.geometry.coordinates[0]);
 
             if (isClinicianInBounds(currentPos, bounds)) {
-                console.log('Valid clinician coordinate: ', id);
                 return { id, isValid: true, data: clinicianData };
             } else {
-                // TODO add email alert
-                console.log('Sending email alert. Clinician is not within permitted bounds.');
+                sendAlert(id, `Clinician ${id} has left their bounds.`);
+                return { id, isValid: false, data: clinicianData };
             }
         });
+
+        // A log of the results of each call. Could send this to a worker dedicated to logging errors and warnings.
+        // But for now is unused.
+        let results = await Promise.allSettled(promises);
+        results.forEach(p => {
+            if (p.status === 'fulfilled') {
+                console.log(`Clinician: ${p.value.id}, isValid: ${p.value.isValid}`);
+            } else {
+                // TODO either handle or log the rejected promises.
+            }
+        });
+        console.log('-');
+        return results;
     } catch (err) {
-        console.log('monitorClinicians Error: ', err);
+        console.error('monitorClinicians Error: ', err);
     }
-}
-
-async function sendAlert(id: number) {
-    const alertMessage = `Clinician ${id} has left their bounds.`
-
-    // TODO send email
 }
 
 /*
@@ -99,15 +100,10 @@ async function startMonitoring() {
     console.log('Clinicians Found: ' + clinicianIds);
     console.log('== Begin Monitoring =');
 
-    // Debug
-    monitorClinicians(clinicianIds);
-    // getClinicianStatus(2);
-    // getClinicianStatus(1);
-
     // init polling 
-    // setInterval(() => {
-    //     monitorClinicians(clinicianIds);
-    // }, POLLING_INTERVAL_MS);
+    setInterval(() => {
+        console.log('Polling...');
+        monitorClinicians(clinicianIds);
+    }, POLLING_INTERVAL_MS);
 }
-
 startMonitoring();
