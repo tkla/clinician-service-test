@@ -3,16 +3,21 @@ A security feature that will alert us within 5 minutes of a phlebotomist leaving
 
 Prerequisites (Optional if you want to send out real emails)
 - Sign up for a SendGrid account
-- Create and store a SendGrid API key with full access "Mail Send" permissions.
+- Create and store a SendGrid API key with full access "Mail Send" permissions
 - Verify your Sender Identity
 
 Optional env vars
+
 BASE_API_URL="https://your-api-url.com/test"
+
 GET_CLINICIANS_URL="/clinicianstatus/"
+
 SPRINTER_EMAIL="yourTargetEmail@fake.com"
 
 Required env vars
+
 SENDGRID_API_KEY="your_sendgrid_apikey"
+
 SENDER_EMAIL="your_sendgrid_verified_email@fake.com"
 
 Running the Service
