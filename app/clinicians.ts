@@ -4,7 +4,7 @@ import { GeoPoint, Polygon, PolygonList } from './types/clinicians-api-types';
 import { sendAlert } from "./api/send-mail";
 import 'dotenv/config';
 
-const POLLING_INTERVAL_MS = 20000; // 1 minute polling
+const POLLING_INTERVAL_MS = 60000; // 1 minute polling
 
 /*
     Check if a given clinician current coordinate is within bounds of the given polygon.
