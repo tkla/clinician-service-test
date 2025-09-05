@@ -11,18 +11,19 @@ export async function sendAlert(id: number, message?: string) {
         }
     });
 
+    const now: Date = new Date();
     const mailOptions = {
         from: process.env.SENDER_EMAIL,
         to: 'gdsubwqd@sharklasers.com',
-        subject: "Clinician Out of Bounds",
-        text: alertMessage,
+        subject: `Kenny La Sprinter Health Programming Challenge - Clinician ${id} Out of Bounds`,
+        text: now.toString() + '\n' + alertMessage,
     };
 
     try {
         console.log('Sending', mailOptions);
-        let info = await transporter.sendMail(mailOptions);
-        console.log('Email sent: ' + info.response);
+        let sendEmailData = await transporter.sendMail(mailOptions);
+        console.log('Email successfully sent status: ' + sendEmailData.response);
     } catch (error) {
-        console.error('Error sending email: ', error);
+        console.error('nodemailer encountered an error attempting to send email:', error);
     }
 }

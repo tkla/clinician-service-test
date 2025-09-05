@@ -1,7 +1,8 @@
 import { sendAlert } from './send-mail';
-// If this were a Prod APP, read from .env files instead.
-const BASE_API_URL = 'https://3qbqr98twd.execute-api.us-west-2.amazonaws.com/test';
-const GET_CLINICIANS_URL = '/clinicianstatus/';
+import RateLimiter from '../rate_limiter/rate-limiter';
+
+const BASE_API_URL = process.env.BASE_API_URL || 'https://3qbqr98twd.execute-api.us-west-2.amazonaws.com/test';
+const GET_CLINICIANS_URL = process.env.GET_CLINICIANS_URL || '/clinicianstatus/';
 
 /*
     Get Clinicians API. Returns the geocoordinates of a clinician along with coordinates of their permitted polygon
@@ -84,16 +85,22 @@ export const getClinicianStatus = async (id: number): Promise<any | null> => {
     // I should type the return to the above instead of a Promise<any>
     const getClinicianStatusUrl = BASE_API_URL + GET_CLINICIANS_URL + id;
     try {
-        const res = await fetch(getClinicianStatusUrl);
+        const res = await RateLimiter.fetchData(getClinicianStatusUrl);
+        if (!res) {
+            throw new Error('Exceeded QPS Limit'); // We can add better error messages here, but for now default to exceed QPS.
+        }
+        // Potential TODO? add rate limited calls to a retry que.
+
         const clinicianMeta = await res.json();
         if (!clinicianMeta) throw new Error('Expected FeatureCollection from API response but received undefined.');
 
         // type check clinicianMeta at runtime
         let features = clinicianMeta.features;
         if (!features) throw new Error('Expected Features in FeatureCollection but field is undefined.');
-        // features first index is always a clinician's coordinate or 'point' type
-        // The rest of the items should be type Polygon with no interior ring
+        // features first index is always a clinician's coordinate or 'point' type so we skip first index.
+        // The rest of the items should be type Polygon with no interior ring.
         for (let i = 1; i < features.length; i++) {
+            // If the polygon has more than 1 coordinate, it's a polygon with interior rings.
             if (features[i].geometry.coordinates.length > 1) {
                 sendAlert(id, 'We currently do not handle GeoJSON Polygons with interior rings, please redefine the permitted boundary with only exterior ring coordinates defined.');
                 return null; // Alternatively we could throw an error if we want to more explicitly not allow interior rings.
@@ -107,5 +114,4 @@ export const getClinicianStatus = async (id: number): Promise<any | null> => {
         console.error('Error in getClinicianStatus: ', err);
         return null;
     }
-
 }
